@@ -4,9 +4,14 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using EventEmitter;
 using Microsoft.Extensions.Logging;
-using Wechaty.Schemas;
+using Wechaty.Module.Common;
+using Wechaty.Module.EventEmitter;
+using Wechaty.Module.Filebox;
+using Wechaty.Module.MemoryCard;
+using Wechaty.Module.Puppet;
+using Wechaty.Module.Puppet.Schemas;
+using Wechaty.Module.PuppetHostie;
 using Wechaty.User;
 
 namespace Wechaty
@@ -16,9 +21,6 @@ namespace Wechaty
     /// </summary>
     public class Wechaty : EventEmitter<Wechaty>, ISayable
     {
-
-
-
         private const string PUPPET_MEMORY_NAME = "puppet";
 
         /// <summary>
@@ -121,7 +123,15 @@ namespace Wechaty
         public Wechaty(PuppetOptions options)
         {
 
-            ILoggerFactory loggerFactory = new LoggerFactory();
+            //ILoggerFactory loggerFactory = new LoggerFactory();
+
+
+            var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                .AddConsole();
+            });
+
             var logger = new Logger<WechatyPuppet>(loggerFactory);
 
             var grpcPuppet = new GrpcPuppet(options, logger, loggerFactory);
@@ -281,13 +291,21 @@ namespace Wechaty
                 .OnMessage(async payload =>
                 {
                     var message = Message.Load(payload.MessageId);
-                    await message.Ready;
-                    _ = EmitMessage(message);
-                    var room = message.Room;
-                    if (room != null)
+                    try
                     {
-                        _ = room.EmitMessage(message);
+                        await message.Ready;
+                        _ = EmitMessage(message);
+                        var room = message.Room;
+                        if (room != null)
+                        {
+                            _ = room.EmitMessage(message);
+                        }
                     }
+                    catch (Exception ex)
+                    {
+                        EmitError(ex);
+                    }
+                   
                 }).OnReady(payload =>
                 {
                     _ = Emit("ready");
@@ -368,7 +386,7 @@ namespace Wechaty
                 throw new InvalidOperationException("start life timer exist");
             }
 
-            State.IsOn = EventEmitter.State.PendingSymbol;
+            State.IsOn = Module.EventEmitter.State.PendingSymbol;
 
             try
             {
@@ -414,7 +432,7 @@ namespace Wechaty
             //todo: implement stop
         }
 
-        public Task Ready() => _readyState.Ready(EventEmitter.State.On);
+        public Task Ready() => _readyState.Ready(Module.EventEmitter.State.On);
 
         public async Task Logout()
         {

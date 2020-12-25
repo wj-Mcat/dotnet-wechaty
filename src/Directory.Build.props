@@ -2,15 +2,16 @@
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <LangVersion>8.0</LangVersion>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(SolutionDir)NullableAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.6.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.5" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.8.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
   </ItemGroup>
   <!--common properties for package-->
   <PropertyGroup>
@@ -19,8 +20,8 @@
     <description>dotnet wechaty</description>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <!--Workaround for https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#packageicon-->
-    <PackageiconUrl>https://wechaty.js.org/img/wechaty-icon.svg</PackageiconUrl>
-    <PackageIcon>wechaty.png</PackageIcon>
+    <PackageiconUrl>https://avatars0.githubusercontent.com/u/21285357</PackageiconUrl>
+    <!--<PackageIcon>wechaty.png</PackageIcon>-->
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://wechaty.js.org</PackageProjectUrl>
@@ -31,12 +32,12 @@
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Version)' == ''">
-    <Version>0.1.2</Version>
+  <PropertyGroup>
+    <Version>0.1.4</Version>
   </PropertyGroup>
-  <ItemGroup>
+  <!--<ItemGroup>
     <None Include="$(SolutionDir)wechaty.png" Pack="true" PackagePath=""/>
-  </ItemGroup>
+  </ItemGroup>-->
   <ItemGroup>
     <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.3" PrivateAssets="All" />
   </ItemGroup>

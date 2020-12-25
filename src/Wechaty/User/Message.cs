@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Nito.AsyncEx;
-using Wechaty.Schemas;
+using Wechaty.Module.Common;
+using Wechaty.Module.Filebox;
+using Wechaty.Module.Puppet.Schemas;
 
 namespace Wechaty.User
 {
@@ -245,12 +247,12 @@ namespace Wechaty.User
             }
             var room = Room;
             var from = From;
-            var conversationId =string.Empty;
-            if (room != null && room.Id!=string.Empty)
+            var conversationId = string.Empty;
+            if (room != null && room.Id != string.Empty)
             {
                 conversationId = room.Id;
             }
-            else if (from!=null && from.Id!=string.Empty)
+            else if (from != null && from.Id != string.Empty)
             {
                 conversationId = from.Id;
             }
@@ -282,7 +284,7 @@ namespace Wechaty.User
             }
             var room = Room;
             var from = From;
-            var conversationId = room?.Id ?? from?.Id;
+            var conversationId = string.IsNullOrEmpty(room?.Id) ? from?.Id : room.Id;
             if (conversationId == null)
             {
                 throw new InvalidOperationException("neither room nor from?");
@@ -310,7 +312,7 @@ namespace Wechaty.User
             }
             var room = Room;
             var from = From;
-            var conversationId = room?.Id ?? from?.Id;
+            var conversationId = string.IsNullOrEmpty(room?.Id) ? from?.Id : room?.Id;
             if (conversationId == null)
             {
                 throw new InvalidOperationException("neither room nor from?");
@@ -338,7 +340,7 @@ namespace Wechaty.User
             }
             var room = Room;
             var from = From;
-            var conversationId = room?.Id ?? from?.Id;
+            var conversationId = string.IsNullOrEmpty(room?.Id) ? from?.Id : room.Id;
             if (conversationId == null)
             {
                 throw new InvalidOperationException("neither room nor from?");
@@ -366,7 +368,7 @@ namespace Wechaty.User
             }
             var room = Room;
             var from = From;
-            var conversationId = room?.Id ?? from?.Id;
+            var conversationId = string.IsNullOrEmpty(room?.Id) ? from?.Id : room?.Id;
             if (conversationId == null)
             {
                 throw new InvalidOperationException("neither room nor from?");
@@ -394,7 +396,7 @@ namespace Wechaty.User
             }
             var room = Room;
             var from = From;
-            var conversationId = room?.Id ?? from?.Id;
+            var conversationId = string.IsNullOrEmpty(room?.Id) ? from?.Id : room.Id;
             if (conversationId == null)
             {
                 throw new InvalidOperationException("neither room nor from?");
@@ -611,7 +613,7 @@ namespace Wechaty.User
             catch (Exception exception)
             {
                 Logger.LogError(exception, $"forward({to}) failed.");
-                throw;
+                Emit("error", exception);
             }
         }
 
@@ -679,7 +681,7 @@ namespace Wechaty.User
         /// Extract the Image File from the Message, so that we can use different image sizes.
         /// </summary>
         /// <returns></returns>
-        public Image ToImage()
+        public Image? ToImage()
         {
             if (Logger.IsEnabled(LogLevel.Trace))
             {
@@ -687,7 +689,9 @@ namespace Wechaty.User
             }
             if (Type != MessageType.Image)
             {
-                throw new InvalidOperationException($"not a image type message. type: {Type}");
+                //throw new InvalidOperationException($"not a image type message. type: {Type}");
+                Emit("error", $"not a image type message. type: {Type}");
+                return null;
             }
             return base.WechatyInstance.Image.Create(Id);
         }

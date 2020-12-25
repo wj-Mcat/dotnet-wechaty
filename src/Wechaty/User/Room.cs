@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using EventEmitter;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Wechaty.Schemas;
+using Wechaty.Module.Common;
+using Wechaty.Module.EventEmitter;
+using Wechaty.Module.Filebox;
+using Wechaty.Module.Puppet.Schemas;
 
 namespace Wechaty.User
 {
@@ -137,12 +140,19 @@ namespace Wechaty.User
             {
                 Logger.LogTrace($"say({text},{(replyTo != null ? string.Join<Contact>(",", replyTo) : "")})");
             }
+
+            var someText = new StringBuilder();
             if (replyTo?.Length > 0)
             {
                 var memtionAlias = await Task.WhenAll(replyTo.Select(async c => await Alias(c) ?? c.Name));
-                text = '@' + string.Join('@', memtionAlias);
+                for (int i = 0; i < memtionAlias.Count(); i++)
+                {
+                    someText.Append($"@{memtionAlias[i]} ");
+                }
             }
-            var msgId = await Puppet.MessageSendText(Id, text, replyTo?.Select(c => c.Id));
+            var someThing = string.Format("{0}{1}", someText, text);
+
+            var msgId = await Puppet.MessageSendText(Id, someThing, replyTo?.Select(c => c.Id));
             return await TryLoad(msgId);
         }
 
@@ -291,7 +301,7 @@ namespace Wechaty.User
             {
                 Logger.LogTrace($"get topic()");
             }
-            if (IsReady)
+            if (!IsReady)
             {
                 Logger.LogWarning("topic() room not ready");
                 throw new InvalidOperationException("not ready");
@@ -362,7 +372,7 @@ namespace Wechaty.User
         public async Task<string?> Alias(Contact contact)
         {
             var memberPayload = await Puppet.RoomMemberPayload(Id, contact.Id);
-            return memberPayload?.RoomAlias;
+            return memberPayload?.RoomAlias == string.Empty ? memberPayload?.Name : memberPayload?.RoomAlias;
         }
 
         public async Task<bool> Has(Contact contact)

@@ -5,7 +5,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Wechaty.Schemas;
+using Wechaty.Module.Filebox;
+using Wechaty.Module.Puppet.Schemas;
 
 namespace Wechaty.User
 {
@@ -295,14 +296,14 @@ namespace Wechaty.User
                 await Puppet.ContactPayloadDirty(Id);
                 Payload = await Puppet.ContactPayload(Id);
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                Logger.LogError(exception, "ready() failed.");
-                throw;
+                Logger.LogError(ex, "ready() failed.");
+                throw ex;
             }
         }
 
-        public bool IsReady => string.IsNullOrWhiteSpace(Payload?.Name);
+        public bool IsReady => !string.IsNullOrWhiteSpace(Payload?.Name);
 
         public bool Self => Puppet?.SelfId == Id;
 
